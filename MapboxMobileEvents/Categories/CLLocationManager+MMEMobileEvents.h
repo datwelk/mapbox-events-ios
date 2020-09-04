@@ -7,6 +7,9 @@
 void mme_linkCLLocationManagerCategory();
 #pragma clang diagnostic pop
 
-+ (NSString *)mme_authorizationStatusString;
+- (CLAuthorizationStatus)mme_authorizationStatus;
+- (NSString *)mme_authorizationStatusString;
+
+- (NSString *)mme_accuracyAutorizationString API_AVAILABLE(ios(14.0), macos(11.0), watchos(7.0), tvos(14.0));
 
 @end

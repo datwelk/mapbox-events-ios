@@ -6,6 +6,7 @@
 #import "MMEUIApplicationWrapper.h"
 #import "NSUserDefaults+MMEConfiguration.h"
 #import "NSBundle+MMEMobileEvents.h"
+#import "Categories/CLLocationManager+MMEMobileEvents.h"
 
 static const NSTimeInterval MMELocationManagerHibernationTimeout = 300.0;
 static const NSTimeInterval MMELocationManagerHibernationPollInterval = 5.0;
@@ -70,6 +71,22 @@ NSString * const MMELocationManagerRegionIdentifier = @"MMELocationManagerRegion
     }
 }
 
+- (NSString *)locationAuthorizationString {
+    return [self.locationManager mme_authorizationStatusString];
+}
+
+- (NSString *)accuracyAuthorizationString {
+    if (@available(iOS 14.0, *)) {
+        return [self.locationManager mme_accuracyAutorizationString];
+    } else {
+        return @"";
+    }
+}
+
+- (CLAuthorizationStatus)locationAuthorization {
+    return [self.locationManager mme_authorizationStatus];
+}
+
 - (void)setLocationManager:(CLLocationManager *)locationManager {
     id<CLLocationManagerDelegate> delegate = _locationManager.delegate;
     _locationManager.delegate = nil;
@@ -88,7 +105,7 @@ NSString * const MMELocationManagerRegionIdentifier = @"MMELocationManagerRegion
 - (void)setMetricsEnabledForInUsePermissions:(BOOL)metricsEnabledForInUsePermissions {
     _metricsEnabledForInUsePermissions = metricsEnabledForInUsePermissions;
     
-    CLAuthorizationStatus authorizationStatus = [CLLocationManager authorizationStatus];
+    CLAuthorizationStatus authorizationStatus = [self.locationManager mme_authorizationStatus];
     if (authorizationStatus == kCLAuthorizationStatusAuthorizedWhenInUse && self.hostAppHasBackgroundCapability) {
         if (@available(iOS 9.0, *)) {
             self.locationManager.allowsBackgroundLocationUpdates = self.isMetricsEnabledForInUsePermissions;
@@ -105,7 +122,7 @@ NSString * const MMELocationManagerRegionIdentifier = @"MMELocationManagerRegion
 }
 
 - (void)startLocationServices {
-    CLAuthorizationStatus authorizationStatus = [CLLocationManager authorizationStatus];
+    CLAuthorizationStatus authorizationStatus = [self.locationManager mme_authorizationStatus];
     
     BOOL authorizedAlways = authorizationStatus == kCLAuthorizationStatusAuthorizedAlways;
     
@@ -185,6 +202,7 @@ NSString * const MMELocationManagerRegionIdentifier = @"MMELocationManagerRegion
 
 #pragma mark - CLLocationManagerDelegate
 
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 140000
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
     if (status == kCLAuthorizationStatusAuthorizedAlways ||
         status == kCLAuthorizationStatusAuthorizedWhenInUse) {
@@ -193,6 +211,17 @@ NSString * const MMELocationManagerRegionIdentifier = @"MMELocationManagerRegion
         [self stopUpdatingLocation];
     }
 }
+#else
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager {
+    CLAuthorizationStatus status = [manager mme_authorizationStatus];
+    if (status == kCLAuthorizationStatusAuthorizedAlways ||
+        status == kCLAuthorizationStatusAuthorizedWhenInUse) {
+        [self startUpdatingLocation];
+    } else {
+        [self stopUpdatingLocation];
+    }
+}
+#endif
 
 - (void)locationManager:(CLLocationManager *)locationManager didUpdateLocations:(NSArray<CLLocation *> *)locations {
     CLLocation *location = locations.lastObject;
