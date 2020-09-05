@@ -21,6 +21,7 @@ static MMEPersistentKey * const MMECollectionDisabled = @"MMECollectionDisabled"
 static MMEPersistentKey * const MMECollectionDisabledInBackground = @"MMECollectionDisabledInBackground";
 static MMEPersistentKey * const MMEBackgroundStartupDelay = @"MMEBackgroundStartupDelay";
 static MMEPersistentKey * const MMEBackgroundGeofence = @"MMEBackgroundGeofence";
+static MMEPersistentKey * const MMEHorizontalAccuracy = @"MMEHorizontalAccuracy";
 static MMEPersistentKey * const MMECertificateRevocationList = @"MMECertificateRevocationList";
 static MMEPersistentKey * const MMEConfigEventTag = @"MMEConfigEventTag";
 static MMEPersistentKey * const MMEConfigUpdateData = @"MMEConfigUpdateData";
@@ -78,6 +79,7 @@ static NSString * const MMEConfigTTOKey = @"tto"; // telemetry type option
 static NSString * const MMEConfigGFOKey = @"gfo"; // geo-fence option
 static NSString * const MMEConfigBSOKey = @"bso"; // background startup option
 static NSString * const MMEConfigTagKey = @"tag"; // event tag
+static NSString * const MMEConfigHAOKey = @"hao"; // hao option
 
 // MARK: - Constants
 
@@ -88,6 +90,7 @@ static NSTimeInterval const MMEConfigurationUpdateIntervalDefault = 24 * 60 * 60
 static NSTimeInterval const MMEBackgroundStartupDelayDefault = 15.0; // seconds
 static NSTimeInterval const MMEStartupDelayDefault = 1;
 static CLLocationDistance const MMEBackgroundGeofenceDefault = 300.0; // Meters
+static CLLocationAccuracy const MMEHorizontalAccuracyDefault = 300.0; // Meters
 
 // MARK: - Limits
 

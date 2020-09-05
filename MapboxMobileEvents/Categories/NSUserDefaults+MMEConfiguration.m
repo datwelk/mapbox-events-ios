@@ -100,6 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
     [self registerDefaults:@{
         MMEStartupDelay: @(startupDelay), // seconds
         MMEBackgroundGeofence: @(backgroundGeofence), // meters
+        MMEHorizontalAccuracy: @(MMEHorizontalAccuracyDefault), // meters
         MMEEventFlushCount: @(MMEEventFlushCountDefault), // events
         MMEEventFlushInterval: @(MMEEventFlushIntervalDefault), // seconds
         MMEIdentifierRotationInterval: @(MMEIdentifierRotationIntervalDefault), // 24 hours
@@ -425,6 +426,10 @@ NS_ASSUME_NONNULL_BEGIN
     return (CLLocationDistance)[self doubleForKey:MMEBackgroundGeofence];
 }
 
+-(CLLocationAccuracy)mme_horizontalAccuracy {
+    return (CLLocationAccuracy)[self doubleForKey:MMEHorizontalAccuracy];
+}
+
 // MARK: - Certificate Pinning and Revocation
 
 - (NSArray<NSString *>*)mme_certificateRevocationList {
@@ -547,6 +552,16 @@ NS_ASSUME_NONNULL_BEGIN
             }
         }
         
+        id configHAO = [configDictionary objectForKey:MMEConfigHAOKey];
+        if ([configHAO isKindOfClass:NSNumber.class]) {
+            CLLocationDistance horizontalAccuracy = [configHAO doubleValue];
+            if (horizontalAccuracy != 0) {
+                [self mme_setObject:@(horizontalAccuracy) forPersistentKey:MMEHorizontalAccuracy];
+            } else { // fallback to the default
+                [self removeObjectForKey:MMEHorizontalAccuracy];
+            }
+        }
+
         id configBSO = [configDictionary objectForKey:MMEConfigBSOKey];
         if ([configBSO isKindOfClass:NSNumber.class]) {
             NSTimeInterval bsoInterval = [configBSO doubleValue];
